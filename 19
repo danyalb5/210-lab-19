@@ -1,0 +1,98 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>  
+#include <cstdlib>  
+#include <ctime>    
+#include <iomanip>  
+
+using namespace std;
+
+struct ReviewNode {
+    double rating;
+    string comment;
+    ReviewNode* next;
+};
+
+class Movie {
+private:
+    string title;
+    ReviewNode* head;
+
+public:
+    // Constructor
+    Movie(string movieTitle) : title(movieTitle), head(nullptr) {}
+
+    // Destructor to free memory
+    ~Movie() {
+        while (head) {
+            ReviewNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+
+    // Function to add a review at the head of the linked list
+    void addReview(double rating, const string& comment) {
+        ReviewNode* newNode = new ReviewNode{rating, comment, head};
+        head = newNode;
+    }
+
+    // Function to display reviews
+    void displayReviews() const {
+        cout << "Movie: " << title << endl;
+        ReviewNode* temp = head;
+        int count = 1;
+        while (temp) {
+            cout << "  Review #" << count++ << ": " << temp->rating << " - " << temp->comment << endl;
+            temp = temp->next;
+        }
+    }
+};
+
+// Function to generate a random rating between 1.0 and 5.0
+double generateRandomRating() {
+    return ((rand() % 41) + 10) / 10.0;  // Generate a random number between 1.0 and 5.0
+}
+
+// Function to read review comments from a file
+vector<string> readCommentsFromFile(const string& filename) {
+    vector<string> comments;
+    ifstream file(filename);
+    string line;
+    while (getline(file, line)) {
+        comments.push_back(line);
+    }
+    return comments;
+}
+
+int main() {
+    // Seed random number generator
+    srand(static_cast<unsigned int>(time(0)));
+
+    
+    vector<Movie> movies;
+    
+    
+    movies.push_back(Movie("Inception"));
+    movies.push_back(Movie("Interstellar"));
+
+    // Read comments from external file
+    vector<string> comments = readCommentsFromFile("reviews.txt");
+
+    // Add two reviews to each movie
+    for (int i = 0; i < 2; ++i) {
+        double randomRating = generateRandomRating();
+        movies[0].addReview(randomRating, comments[i]);
+
+        randomRating = generateRandomRating();
+        movies[1].addReview(randomRating, comments[i + 2]);  // Use different comments for the second movie
+    }
+
+    
+    for (const auto& movie : movies) {
+        movie.displayReviews();
+    }
+
+    return 0;
+}
